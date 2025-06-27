@@ -13,6 +13,10 @@ app.use(express.json());
 
 // const { spawn } = require('child_process');
 
+app.get('/',(req,res)=>{
+  res.send("Hello");
+})
+
 app.post('/api/detect-cycle', (req, res) => {
   const { nodes, edges, directed } = req.body;
 
