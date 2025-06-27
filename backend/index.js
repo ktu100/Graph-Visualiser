@@ -13,9 +13,9 @@ app.use(express.json());
 
 // const { spawn } = require('child_process');
 
-app.get('/',(req,res)=>{
-  res.send("Hello");
-})
+// app.get('/',(req,res)=>{
+//   res.send("Hello");
+// })
 
 app.post('/api/detect-cycle', (req, res) => {
   const { nodes, edges, directed } = req.body;
@@ -31,7 +31,7 @@ app.post('/api/detect-cycle', (req, res) => {
     edges.map(({ from, to }) => `${from} ${to}`).join('\n') + '\n';
 
   // Spawn the C++ executable
-  const child = spawn('./detect_cycle.exe'); // Make sure it's built and in the same directory
+  const child = spawn('./detect_cycle'); // Make sure it's built and in the same directory
 
   let output = '';
   let error = '';
@@ -85,7 +85,7 @@ edges.forEach(({ from, to }) => {
     
   
 
-  const exePath = directed ? './dfs_directed.exe' : './dfs_undirected.exe';
+  const exePath = directed ? './dfs_directed' : './dfs_undirected';
   const child = spawn(exePath);
 
   let output = '', error = '';
@@ -114,7 +114,7 @@ edges.forEach(({ from, to }) => {
   
   
 
-  const exePath = directed ? './bfs_directed.exe' : './bfs_undirected.exe';
+  const exePath = directed ? './bfs_directed' : './bfs_undirected';
   const child = spawn(exePath);
 
   let output = '', error = '';
@@ -150,7 +150,7 @@ let mnwt=10000000;
 
   // console.log("directed:"+directed);
 
-  const exePath =directed?'./weighted_shortest.exe':'./undirected_shortest.exe';
+  const exePath =directed?'./weighted_shortest':'./undirected_shortest';
   // console.log(exePath);
   const child = spawn(exePath);
   let output = '', error = '';
