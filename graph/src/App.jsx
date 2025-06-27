@@ -62,7 +62,7 @@ const EdgeInputForm = () => {
 
     const data = await response.json();
 
-    console.log("Cycle API Response:", data); // ✅ Debug line
+    console.log("Cycle API Response:", data); 
 if (data?.hasCycle === true) {
       setCycleOutput('🚨 Cycle detected!');
     } else if (data?.hasCycle === false) {

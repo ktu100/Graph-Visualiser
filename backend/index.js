@@ -13,54 +13,50 @@ app.use(cors({
   credentials: true
 }));
 
-// app.options('*', cors()); // Handle preflight requests
+
 
 app.use(express.json());
 
-// const { spawn } = require('child_process');
 
-// app.get('/',(req,res)=>{
-//   res.send("Hello");
-// })
 
 app.post('/api/detect-cycle', (req, res) => {
   const { nodes, edges, directed } = req.body;
 
-  // Determine the highest numbered node (for safety)
+
   let maxNode = 0;
   edges.forEach(({ from, to }) => {
     maxNode = Math.max(maxNode, from, to);
   });
 
-  // Format the input for the C++ executable
+  
   const input = `${directed ? 1 : 0} ${maxNode} ${edges.length}\n` +
     edges.map(({ from, to }) => `${from} ${to}`).join('\n') + '\n';
 
-  // Spawn the C++ executable
-  const child = spawn('./detect_cycle'); // Make sure it's built and in the same directory
+  
+  const child = spawn('./detect_cycle'); 
 
   let output = '';
   let error = '';
 
   console.log("Sending to C++:\n" + input);
 
-  // Write input to the child process
+ 
   child.stdin.write(input);
   child.stdin.end();
 
-  // Capture stdout from C++
+  
   child.stdout.on('data', (data) => {
     output += data.toString();
     console.log('C++ stdout:', data.toString());
   });
 
-  // Capture stderr (errors)
+  
   child.stderr.on('data', (data) => {
     error += data.toString();
     console.error('C++ stderr:', data.toString());
   });
 
-  // On process close, send response
+  
   child.on('close', (code) => {
     console.log("Final C++ Output:", output.trim());
 
@@ -68,7 +64,7 @@ app.post('/api/detect-cycle', (req, res) => {
       return res.status(500).json({ error: 'Execution failed', detail: error });
     }
 
-    // Clean up and interpret C++ output
+   
     const result = output.trim().toUpperCase();
 
     if (result === 'YES') {
@@ -178,15 +174,9 @@ let mnwt=10000000;
     const trimmed = output.trim();
     res.json(trimmed);
 
-// Try to parse as numbers
-// const parts = trimmed.split(/\s+/);
-// const allNumbers = parts.every(p => !isNaN(p));
 
-// if (allNumbers) {
-//   res.json({ path: parts.map(Number) });
-// } else {
-//   res.json({ message: trimmed });
-// }
+
+
 
     console.log("Output:"+trimmed);
   });

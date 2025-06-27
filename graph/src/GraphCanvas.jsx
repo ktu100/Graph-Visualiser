@@ -51,12 +51,12 @@ const GraphCanvas = ({ edges, isDirected, isWeighted, width = 1000, height = 800
         .attr('orient', 'auto')
         .append('path')
         .attr('d', 'M0,-5L10,0L0,5')
-        .attr('fill', '#facc15'); // yellow for arrow
+        .attr('fill', '#facc15'); 
     }
 
     const link = svg
       .append('g')
-      .attr('stroke', '#facc15') // yellow edges
+      .attr('stroke', '#facc15') 
       .attr('stroke-width', 2)
       .selectAll('line')
       .data(links)
@@ -72,7 +72,7 @@ const GraphCanvas = ({ edges, isDirected, isWeighted, width = 1000, height = 800
         .enter()
         .append('text')
         .attr('class', 'weight-label')
-        .attr('fill', '#22c55e') // green weight text
+        .attr('fill', '#22c55e') 
         .attr('font-size', '14px')
         .style('font-weight', 'bold')
         .text((d) => d.weight)
@@ -89,7 +89,7 @@ const GraphCanvas = ({ edges, isDirected, isWeighted, width = 1000, height = 800
       .enter()
       .append('circle')
       .attr('r', 25)
-      .attr('fill', '#0B5ED7') // blue nodes
+      .attr('fill', '#0B5ED7') 
       .call(
         d3
           .drag()
