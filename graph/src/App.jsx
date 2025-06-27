@@ -4,7 +4,7 @@ import { PiGraphBold } from "react-icons/pi";
 import './App.css'
 
 
-//https://graph-visualiser-backendd.onrender.com
+//https://graph-visualiser-mbb.onrender.com
 //https://graph-visualiser-frontend.onrender.com
 
 
@@ -47,7 +47,7 @@ const EdgeInputForm = () => {
 
  const checkCycle = async () => {
   try {
-    const response = await fetch('https://graph-visualiser-backendd.onrender.com/api/detect-cycle', {
+    const response = await fetch('https://graph-visualiser-mbb.onrender.com/api/detect-cycle', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -83,7 +83,7 @@ if (data?.hasCycle === true) {
       return;
     }
     try {
-      const response = await fetch('https://graph-visualiser-backendd.onrender.com/api/dfs', {
+      const response = await fetch('https://graph-visualiser-mbb.onrender.com/api/dfs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -111,7 +111,7 @@ if (data?.hasCycle === true) {
       return;
     }
     try {
-      const response = await fetch('https://graph-visualiser-backendd.onrender.com/api/bfs', {
+      const response = await fetch('https://graph-visualiser-mbb.onrender.com/api/bfs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -140,7 +140,7 @@ if (data?.hasCycle === true) {
     }
 
     try {
-      const response = await fetch('https://graph-visualiser-backendd.onrender.com/api/shortest-path', {
+      const response = await fetch('https://graph-visualiser-mbb.onrender.com/api/shortest-path', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

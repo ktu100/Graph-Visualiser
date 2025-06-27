@@ -7,8 +7,14 @@ const app = express();
 const PORT = 5000;
 
 app.use(cors({
-  origin: 'https://graph-visualiser-frontend.onrender.com'  // allow your deployed frontend
+  origin: 'https://graph-visualiser-frontend.onrender.com',
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type'],
+  credentials: true
 }));
+
+app.options('*', cors()); // Handle preflight requests
+
 app.use(express.json());
 
 // const { spawn } = require('child_process');
