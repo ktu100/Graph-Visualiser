@@ -3,6 +3,11 @@ import GraphCanvas from './GraphCanvas';
 import { PiGraphBold } from "react-icons/pi";
 import './App.css'
 
+
+//https://graph-visualiser-backendd.onrender.com
+//https://graph-visualiser-frontend.onrender.com
+
+
 const EdgeInputForm = () => {
   const [edges, setEdges] = useState([{ from: '', to: '', weight: '' }]);
   const [submittedEdges, setSubmittedEdges] = useState([]);
@@ -42,7 +47,7 @@ const EdgeInputForm = () => {
 
  const checkCycle = async () => {
   try {
-    const response = await fetch('http://localhost:5000/api/detect-cycle', {
+    const response = await fetch('https://graph-visualiser-backendd.onrender.com/api/detect-cycle', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -78,7 +83,7 @@ if (data?.hasCycle === true) {
       return;
     }
     try {
-      const response = await fetch('http://localhost:5000/api/dfs', {
+      const response = await fetch('https://graph-visualiser-backendd.onrender.com/api/dfs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -106,7 +111,7 @@ if (data?.hasCycle === true) {
       return;
     }
     try {
-      const response = await fetch('http://localhost:5000/api/bfs', {
+      const response = await fetch('https://graph-visualiser-backendd.onrender.com/api/bfs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -135,7 +140,7 @@ if (data?.hasCycle === true) {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/shortest-path', {
+      const response = await fetch('https://graph-visualiser-backendd.onrender.com/api/shortest-path', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
