@@ -8,47 +8,64 @@ const PORT = 5000;
 app.use(cors());
 app.use(express.json());
 
+// const { spawn } = require('child_process');
+
 app.post('/api/detect-cycle', (req, res) => {
-  const { nodes, edges } = req.body;
+  const { nodes, edges, directed } = req.body;
 
+  // Determine the highest numbered node (for safety)
   let maxNode = 0;
-edges.forEach(({ from, to }) => {
-  maxNode = Math.max(maxNode, from, to);
-});
-const input = `${maxNode} ${edges.length}\n` +
-  edges.map(({ from, to }) => `${from} ${to}`).join('\n');
+  edges.forEach(({ from, to }) => {
+    maxNode = Math.max(maxNode, from, to);
+  });
 
+  // Format the input for the C++ executable
+  const input = `${directed ? 1 : 0} ${maxNode} ${edges.length}\n` +
+    edges.map(({ from, to }) => `${from} ${to}`).join('\n') + '\n';
 
-  const child = spawn('./detect_cycle.exe'); // Path to your compiled .exe
+  // Spawn the C++ executable
+  const child = spawn('./detect_cycle.exe'); // Make sure it's built and in the same directory
 
   let output = '';
   let error = '';
 
   console.log("Sending to C++:\n" + input);
 
+  // Write input to the child process
   child.stdin.write(input);
   child.stdin.end();
 
+  // Capture stdout from C++
   child.stdout.on('data', (data) => {
-  output += data.toString();
-  console.error('C++ stdout:', data.toString()); // 🔍 log C++ error output
-});
-
-  child.stderr.on('data', (data) => {
-  error += data.toString();
-  console.error('C++ stderr:', data.toString()); // 🔍 log C++ error output
-});
-
-
-  child.on('close', (code) => {
-    if (code !== 0 || error) {
-      console.error('C++ Error:', error);
-      return res.status(500).json({ error: 'Execution failed' });
-    }
-    res.json({ hasCycle: output.trim() === 'YES' });
+    output += data.toString();
+    console.log('C++ stdout:', data.toString());
   });
 
+  // Capture stderr (errors)
+  child.stderr.on('data', (data) => {
+    error += data.toString();
+    console.error('C++ stderr:', data.toString());
+  });
+
+  // On process close, send response
+  child.on('close', (code) => {
+    console.log("Final C++ Output:", output.trim());
+
+    if (code !== 0 || error) {
+      return res.status(500).json({ error: 'Execution failed', detail: error });
+    }
+
+    // Clean up and interpret C++ output
+    const result = output.trim().toUpperCase();
+
+    if (result === 'YES') {
+      res.json({ hasCycle: true });
+    } else {
+      res.json({ hasCycle: false });
+    }
+  });
 });
+
 
 app.post('/api/dfs', (req, res) => {
   const {nodes, edges, startNode, directed } = req.body;

@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import GraphCanvas from './GraphCanvas';
+import { PiGraphBold } from "react-icons/pi";
+import './App.css'
 
 const EdgeInputForm = () => {
   const [edges, setEdges] = useState([{ from: '', to: '', weight: '' }]);
@@ -38,29 +40,37 @@ const EdgeInputForm = () => {
     return nodes.size;
   };
 
-  const checkCycle = async () => {
-    try {
-      const response = await fetch('http://localhost:5000/api/detect-cycle', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nodes: getNodeCount(submittedEdges),
-          edges: submittedEdges.map(e => ({
-            from: parseInt(e.from),
-            to: parseInt(e.to)
-          })),
-          directed: isDirected
-        })
-      });
+ const checkCycle = async () => {
+  try {
+    const response = await fetch('http://localhost:5000/api/detect-cycle', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nodes: getNodeCount(submittedEdges),
+        edges: submittedEdges.map(e => ({
+          from: parseInt(e.from),
+          to: parseInt(e.to)
+        })),
+        directed: isDirected
+      })
+    });
 
-      const data = await response.json();
-      const msg = data.hasCycle ? '🚨 Cycle detected!' : '✅ No cycle detected.';
-      setCycleOutput(msg);
-    } catch (error) {
-      console.error(error);
-      setCycleOutput('❌ Error checking cycle');
+    const data = await response.json();
+
+    console.log("Cycle API Response:", data); // ✅ Debug line
+if (data?.hasCycle === true) {
+      setCycleOutput('🚨 Cycle detected!');
+    } else if (data?.hasCycle === false) {
+      setCycleOutput('✅ No cycle detected.');
+    } else {
+      setCycleOutput('❓ Unexpected response from backend.');
     }
-  };
+  } catch (error) {
+    console.error("Error in cycle check:", error);
+    setCycleOutput('❌ Error checking cycle');
+  }
+};
+
 
   const checkDFS = async () => {
     if (!startNode) {
@@ -153,10 +163,15 @@ const EdgeInputForm = () => {
   return (
     <div className="p-4 bg-gray-100 rounded-lg overflow-x-auto">
       <form onSubmit={handleSubmit}>
-        <h2 className="text-lg font-bold mb-2">Graph Configuration</h2>
+       <div className="flex items-center mb-6 mx-10">
+  <h2 className="text-2xl font-bold mt-5 font-serif text-amber-800">
+    Graph Visualiser
+  </h2>
+  <PiGraphBold size={50} className="ml-3 text-amber-800" />
+</div>
         <div className="flex gap-8 mb-4">
           <div>
-            <label className="font-medium mr-2">Graph Type:</label>
+            <label className="font-medium mr-2 text-blue-500 text-2xl">Graph Type:</label>
             <select
               value={isDirected ? 'directed' : 'undirected'}
               onChange={(e) => setIsDirected(e.target.value === 'directed')}
@@ -167,7 +182,7 @@ const EdgeInputForm = () => {
             </select>
           </div>
           <div>
-            <label className="font-medium mr-2">Edge Weights:</label>
+            <label className="font-medium mr-2 text-blue-500 text-2xl">Edge Weights:</label>
             <select
               value={isWeighted ? 'weighted' : 'unweighted'}
               onChange={(e) => setIsWeighted(e.target.value === 'weighted')}
@@ -179,7 +194,7 @@ const EdgeInputForm = () => {
           </div>
         </div>
 
-        <h2 className="text-lg font-bold mb-2">Enter Edges</h2>
+        <h2 className="font-bold mb-2  text-green-500 text-2xl">Enter Edges</h2>
         {edges.map((edge, index) => (
           <div key={index} className="flex space-x-2 mb-2">
             <input
@@ -223,12 +238,15 @@ const EdgeInputForm = () => {
 
       {submittedEdges.length > 0 && (
         <div className="mt-8">
-          <h2 className="text-xl font-bold mb-2 overflow-auto">Graph Visualization</h2>
+          <h2 className="text-2xl font-mono font-bold mb-2 overflow-auto flex justify-center">Graph Visualization</h2>
           <GraphCanvas edges={submittedEdges} isDirected={isDirected} isWeighted={isWeighted} 
            width={1000}
-           height={600}
-          className="w-full h-[80vh] border rounded overflow-auto"/>
+           height={800}
+          className="w-1000 h-800 border rounded overflow-auto mx-400"/>
 
+          <button onClick={checkCycle} className="bg-red-500 text-white px-4 py-2 rounded mb-2 mt-5">
+              🔁 Check for Cycle
+            </button>
           <div className="mt-6">
             <label className="font-medium mr-2">Start Node:</label>
             <input
@@ -239,11 +257,7 @@ const EdgeInputForm = () => {
               required
             />
           </div>
-
           <div className="flex gap-4 mt-4">
-            <button onClick={checkCycle} className="bg-red-500 text-white px-4 py-2 rounded">
-              🔁 Check for Cycle
-            </button>
             <button onClick={checkDFS} className="bg-purple-600 text-white px-4 py-2 rounded">
               🧭 Run DFS
             </button>

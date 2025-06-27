@@ -1,15 +1,12 @@
 import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 
-const GraphCanvas = ({ edges, isDirected, isWeighted,width = 1000, height = 600 }) => {
+const GraphCanvas = ({ edges, isDirected, isWeighted, width = 1000, height = 800 }) => {
   const svgRef = useRef();
 
   useEffect(() => {
     const svg = d3.select(svgRef.current);
     svg.selectAll('*').remove();
-
-    const width = 600;
-    const height = 400;
 
     svg.attr('width', width).attr('height', height);
 
@@ -26,7 +23,6 @@ const GraphCanvas = ({ edges, isDirected, isWeighted,width = 1000, height = 600 
       weight: weight || '',
     }));
 
-    // For undirected graphs, add reverse edges too
     if (!isDirected) {
       const reverseEdges = links.map(({ source, target, weight }) => ({
         source: target,
@@ -42,7 +38,6 @@ const GraphCanvas = ({ edges, isDirected, isWeighted,width = 1000, height = 600 
       .force('charge', d3.forceManyBody().strength(-400))
       .force('center', d3.forceCenter(width / 2, height / 2));
 
-    // Define arrow marker if directed
     if (isDirected) {
       svg
         .append('defs')
@@ -56,13 +51,12 @@ const GraphCanvas = ({ edges, isDirected, isWeighted,width = 1000, height = 600 
         .attr('orient', 'auto')
         .append('path')
         .attr('d', 'M0,-5L10,0L0,5')
-        .attr('fill', '#111');
+        .attr('fill', '#facc15'); // yellow for arrow
     }
 
-    // Draw links
     const link = svg
       .append('g')
-      .attr('stroke', '#111')
+      .attr('stroke', '#facc15') // yellow edges
       .attr('stroke-width', 2)
       .selectAll('line')
       .data(links)
@@ -70,25 +64,23 @@ const GraphCanvas = ({ edges, isDirected, isWeighted,width = 1000, height = 600 
       .append('line')
       .attr('marker-end', isDirected ? 'url(#arrow)' : null);
 
-    // Weight labels
     if (isWeighted) {
-  svg
-    .append('g')
-    .selectAll('text')
-    .data(links)
-    .enter()
-    .append('text')
-    .attr('class', 'weight-label')
-    .attr('fill', '#F97316') // Tailwind orange-500 like color
-    .attr('font-size', '14px')
-    .style('font-weight', 'bold')
-    .text((d) => d.weight)
-    .attr('text-anchor', 'middle')
-    .attr('dy', -5)
-    .attr('x', (d) => (d.source.x + d.target.x) / 2)
-    .attr('y', (d) => (d.source.y + d.target.y) / 2);
-}
-
+      svg
+        .append('g')
+        .selectAll('text')
+        .data(links)
+        .enter()
+        .append('text')
+        .attr('class', 'weight-label')
+        .attr('fill', '#22c55e') // green weight text
+        .attr('font-size', '14px')
+        .style('font-weight', 'bold')
+        .text((d) => d.weight)
+        .attr('text-anchor', 'middle')
+        .attr('dy', -5)
+        .attr('x', (d) => (d.source.x + d.target.x) / 2)
+        .attr('y', (d) => (d.source.y + d.target.y) / 2);
+    }
 
     const node = svg
       .append('g')
@@ -97,7 +89,7 @@ const GraphCanvas = ({ edges, isDirected, isWeighted,width = 1000, height = 600 
       .enter()
       .append('circle')
       .attr('r', 25)
-      .attr('fill', '#0B5ED7')
+      .attr('fill', '#0B5ED7') // blue nodes
       .call(
         d3
           .drag()
@@ -107,8 +99,8 @@ const GraphCanvas = ({ edges, isDirected, isWeighted,width = 1000, height = 600 
             d.fy = d.y;
           })
           .on('drag', (event, d) => {
-            d.fx = event.x;
-            d.fy = event.y;
+            d.fx = Math.max(25, Math.min(width - 25, event.x));
+            d.fy = Math.max(25, Math.min(height - 25, event.y));
           })
           .on('end', (event, d) => {
             if (!event.active) simulation.alphaTarget(0);
@@ -132,6 +124,11 @@ const GraphCanvas = ({ edges, isDirected, isWeighted,width = 1000, height = 600 
       .style('font-weight', 'bold');
 
     simulation.on('tick', () => {
+      nodes.forEach((node) => {
+        node.x = Math.max(25, Math.min(width - 25, node.x));
+        node.y = Math.max(25, Math.min(height - 25, node.y));
+      });
+
       link
         .attr('x1', (d) => d.source.x)
         .attr('y1', (d) => d.source.y)
@@ -142,7 +139,6 @@ const GraphCanvas = ({ edges, isDirected, isWeighted,width = 1000, height = 600 
 
       labels.attr('x', (d) => d.x).attr('y', (d) => d.y);
 
-      // Update weight positions if needed
       if (isWeighted) {
         svg.selectAll('text.weight-label')
           .attr('x', (d) => (d.source.x + d.target.x) / 2)
@@ -152,8 +148,8 @@ const GraphCanvas = ({ edges, isDirected, isWeighted,width = 1000, height = 600 
   }, [edges, isDirected, isWeighted]);
 
   return (
-    <div style={{ background: '#d9eaff', borderRadius: '10px', padding: '10px' }}>
-      <svg ref={svgRef}></svg>
+    <div className="bg-black px-10 py-10 flex justify-center items-center rounded-md">
+      <svg ref={svgRef} className="border border-gray-400 rounded-md shadow-lg" />
     </div>
   );
 };
