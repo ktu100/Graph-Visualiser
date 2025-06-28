@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import GraphCanvas from './GraphCanvas';
 import { PiGraphBold } from "react-icons/pi";
 import './App.css'
-
+import axios from './axiosInstance';
 
 //https://graph-visualiser-fullbackend.onrender.com
 //https://graph-visualiser-frontend.onrender.com
@@ -47,23 +47,18 @@ const EdgeInputForm = () => {
 
  const checkCycle = async () => {
   try {
-    const response = await fetch('https://graph-visualiser-fullbackend.onrender.com/api/detect-cycle', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        nodes: getNodeCount(submittedEdges),
-        edges: submittedEdges.map(e => ({
-          from: parseInt(e.from),
-          to: parseInt(e.to)
-        })),
-        directed: isDirected
-      })
+    const response = await axios.post('/api/detect-cycle', {
+      nodes: getNodeCount(submittedEdges),
+      edges: submittedEdges.map(e => ({
+        from: parseInt(e.from),
+        to: parseInt(e.to)
+      })),
+      directed: isDirected
     });
 
-    const data = await response.json();
+    const data = response.data;
 
-    console.log("Cycle API Response:", data); 
-if (data?.hasCycle === true) {
+    if (data?.hasCycle === true) {
       setCycleOutput('🚨 Cycle detected!');
     } else if (data?.hasCycle === false) {
       setCycleOutput('✅ No cycle detected.');
@@ -77,93 +72,77 @@ if (data?.hasCycle === true) {
 };
 
 
-  const checkDFS = async () => {
-    if (!startNode) {
-      alert('Please enter a start node for DFS');
-      return;
-    }
-    try {
-      const response = await fetch('https://graph-visualiser-fullbackend.onrender.com/api/dfs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nodes: getNodeCount(submittedEdges),
-          edges: submittedEdges.map(e => ({
-            from: parseInt(e.from),
-            to: parseInt(e.to)
-          })),
-          startNode: parseInt(startNode),
-          directed: isDirected
-        })
-      });
 
-      const data = await response.json();
-      setDfsOutput(data.traversal.join(' → '));
-    } catch (error) {
-      console.error(error);
-      setDfsOutput('❌ DFS execution failed');
-    }
-  };
+  const checkDFS = async () => {
+  if (!startNode) return alert('Please enter a start node for DFS');
+
+  try {
+    const response = await axios.post('/api/dfs', {
+      nodes: getNodeCount(submittedEdges),
+      edges: submittedEdges.map(e => ({
+        from: parseInt(e.from),
+        to: parseInt(e.to)
+      })),
+      startNode: parseInt(startNode),
+      directed: isDirected
+    });
+
+    setDfsOutput(response.data.traversal.join(' → '));
+  } catch (error) {
+    console.error(error);
+    setDfsOutput('❌ DFS execution failed');
+  }
+};
+
 
   const checkBFS = async () => {
-    if (!startNode) {
-      alert('Please enter a start node for BFS');
-      return;
-    }
-    try {
-      const response = await fetch('https://graph-visualiser-fullbackend.onrender.com/api/bfs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nodes: getNodeCount(submittedEdges),
-          edges: submittedEdges.map(e => ({
-            from: parseInt(e.from),
-            to: parseInt(e.to)
-          })),
-          startNode: parseInt(startNode),
-          directed: isDirected
-        })
-      });
+  if (!startNode) return alert('Please enter a start node for BFS');
 
-      const data = await response.json();
-      setBfsOutput(data.traversal.join(' → '));
-    } catch (error) {
-      console.error(error);
-      setBfsOutput('❌ BFS execution failed');
-    }
-  };
+  try {
+    const response = await axios.post('/api/bfs', {
+      nodes: getNodeCount(submittedEdges),
+      edges: submittedEdges.map(e => ({
+        from: parseInt(e.from),
+        to: parseInt(e.to)
+      })),
+      startNode: parseInt(startNode),
+      directed: isDirected
+    });
+
+    setBfsOutput(response.data.traversal.join(' → '));
+  } catch (error) {
+    console.error(error);
+    setBfsOutput('❌ BFS execution failed');
+  }
+};
+
 
   const findShortestPath = async () => {
-    if (!sourceNode || !targetNode) {
-      alert("Please enter both source and target nodes.");
-      return;
-    }
+  if (!sourceNode || !targetNode) {
+    return alert("Please enter both source and target nodes.");
+  }
 
-    try {
-      const response = await fetch('https://graph-visualiser-fullbackend.onrender.com/api/shortest-path', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nodes: getNodeCount(submittedEdges),
-          edges: submittedEdges.map(e => ({
-            from: parseInt(e.from),
-            to: parseInt(e.to),
-            weight: isWeighted ? parseInt(e.weight || 1) : 1
-          })),
-          source: parseInt(sourceNode),
-          target: parseInt(targetNode),
-          directed: isDirected,
-          weighted: isWeighted
-        })
-      });
+  try {
+    const response = await axios.post('/api/shortest-path', {
+      nodes: getNodeCount(submittedEdges),
+      edges: submittedEdges.map(e => ({
+        from: parseInt(e.from),
+        to: parseInt(e.to),
+        weight: isWeighted ? parseInt(e.weight || 1) : 1
+      })),
+      source: parseInt(sourceNode),
+      target: parseInt(targetNode),
+      directed: isDirected,
+      weighted: isWeighted
+    });
 
-      const resultText = await response.text();
-      setShortestPathOutput(resultText.trim());
-    } catch (error) {
-      console.error(error);
-      setShortestPathOutput("❌ Error finding shortest path");
-    }
-  };
+    setShortestPathOutput(response.data); // assuming it's plain text
+  } catch (error) {
+    console.error(error);
+    setShortestPathOutput("❌ Error finding shortest path");
+  }
+};
+
 
   return (
     <div className="p-4 bg-gray-100 rounded-lg overflow-x-auto">
