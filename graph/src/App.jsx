@@ -136,7 +136,7 @@ const EdgeInputForm = () => {
       weighted: isWeighted
     });
 
-    setShortestPathOutput(response.data); // assuming it's plain text
+    setShortestPathOutput(response.data); 
   } catch (error) {
     console.error(error);
     setShortestPathOutput("❌ Error finding shortest path");
